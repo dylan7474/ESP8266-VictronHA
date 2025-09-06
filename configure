@@ -1,0 +1,36 @@
+#!/bin/sh
+
+missing=0
+
+check_cmd() {
+    if ! command -v "$1" >/dev/null 2>&1; then
+        echo "Error: $1 not found. Install it via your package manager (e.g., sudo apt-get install $2)" >&2
+        missing=1
+    fi
+}
+
+check_lib() {
+    if ! pkg-config --exists "$1" 2>/dev/null; then
+        echo "Error: $1 library not found. Install it via your package manager (e.g., sudo apt-get install $2)" >&2
+        missing=1
+    fi
+}
+
+check_cmd gcc build-essential
+check_cmd sdl2-config libsdl2-dev
+check_cmd pkg-config pkg-config
+
+if command -v pkg-config >/dev/null 2>&1; then
+    check_lib SDL2_ttf libsdl2-ttf-dev
+    check_lib fftw3 libfftw3-dev
+else
+    echo "pkg-config is required to check for libraries. Please install pkg-config." >&2
+    missing=1
+fi
+
+if [ "$missing" -eq 0 ]; then
+    echo "All required tools and libraries are present."
+else
+    echo "One or more dependencies are missing." >&2
+    exit 1
+fi
