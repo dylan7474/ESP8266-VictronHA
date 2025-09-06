@@ -26,13 +26,15 @@ This project uses [arduino-cli](https://arduino.github.io/arduino-cli/latest/) t
 2. (Optional) Install the toolchain and libraries using the provided setup target:
 
    ```bash
-   make setup
+   sudo make setup
    ```
 
-   The script configures a local Arduino toolchain. It detects both
-   `/etc/apt/sources.list` and the newer `/etc/apt/sources.list.d/ubuntu.sources`
-   and skips mirror configuration or package installation if `apt-get` is not
-   available on your system.
+   This step requires root privileges because it configures `/etc/apt` and installs
+   packages via `apt-get`. The script detects both `/etc/apt/sources.list` and the
+   newer `/etc/apt/sources.list.d/ubuntu.sources` and skips mirror configuration or
+   package installation if `apt-get` is not available on your system. If you prefer
+   not to run with elevated permissions, manually install the dependencies and
+   configure `arduino-cli` instead.
 
 3. Compile the sketch for NodeMCU v2 (default make target):
 
