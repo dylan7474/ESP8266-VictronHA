@@ -28,16 +28,22 @@ unsigned long connectStartTime = 0;
 float connectionTime = 0;
 bool wifiConnectedOnce = false;
 
+const int LED_PIN = LED_BUILTIN;
+unsigned long lastLED = 0;
+bool ledState = false;
+unsigned long lastDataSent = 0;
+
 void connectWiFi() {
     display.clearDisplay();
     display.setCursor(0, 0);
     display.setTextSize(1);
     display.println("Connecting to WiFi...");
     display.display();
-    
-    connectStartTime = millis();
+
+    WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASS);
-    while (WiFi.status() != WL_CONNECTED) {
+    connectStartTime = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - connectStartTime < 10000) {
         delay(500);
         display.clearDisplay();
         display.setCursor(0, 0);
@@ -47,8 +53,10 @@ void connectWiFi() {
         display.println("s");
         display.display();
     }
-    connectionTime = (millis() - connectStartTime) / 1000.0;
-    wifiConnectedOnce = true;
+    if (WiFi.status() == WL_CONNECTED) {
+        connectionTime = (millis() - connectStartTime) / 1000.0;
+        wifiConnectedOnce = true;
+    }
 }
 
 void connectMQTT() {
@@ -57,6 +65,27 @@ void connectMQTT() {
             return;
         }
         delay(5000);
+    }
+}
+
+void updateLED() {
+    bool connected = (WiFi.status() == WL_CONNECTED) && mqttClient.connected();
+    unsigned long interval;
+    unsigned long now = millis();
+
+    if (!connected) {
+        interval = 200; // Fast blink for connectivity issues
+    } else if (now - lastDataSent < 5000) {
+        interval = 1000; // Slow blink when data recently sent
+    } else {
+        digitalWrite(LED_PIN, HIGH); // Off when idle
+        return;
+    }
+
+    if (now - lastLED >= interval) {
+        lastLED = now;
+        ledState = !ledState;
+        digitalWrite(LED_PIN, ledState ? LOW : HIGH); // LED is active LOW
     }
 }
 
@@ -98,6 +127,12 @@ void processVictronData(String key, String value) {
     
     scrollText = voltage + "  |  " + current + "  |  " + soc;
     activityIndicator = !activityIndicator;
+
+    if (mqttClient.connected()) {
+        String payload = voltage + "," + current + "," + soc;
+        mqttClient.publish(MQTT_TOPIC, payload.c_str());
+        lastDataSent = millis();
+    }
 }
 
 void setup() {
@@ -112,7 +147,12 @@ void setup() {
     Serial.begin(115200);
     Serial.setRxBufferSize(256);
     Serial.begin(BAUD_RATE, SERIAL_8N1);
-    
+
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, HIGH);
+    WiFi.persistent(false);
+    WiFi.setAutoReconnect(true);
+
     connectWiFi();
     mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
     connectMQTT();
@@ -121,6 +161,7 @@ void setup() {
 void loop() {
     if (WiFi.status() != WL_CONNECTED) {
         disconnectCount++;
+        WiFi.disconnect();
         connectWiFi();
     }
     
@@ -146,4 +187,6 @@ void loop() {
         updateDisplay();
         lastDisplayUpdate = millis();
     }
+
+    updateLED();
 }
