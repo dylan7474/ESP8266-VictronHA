@@ -155,13 +155,13 @@ void processVictronData(String key, String value) {
     } else if (key == "SOC") {
         soc = "SOC: " + String(value.toFloat() / 10, 1) + "%";
     }
-    
+
     scrollText = voltage + "  |  " + current + "  |  " + soc;
     activityIndicator = !activityIndicator;
 
     if (mqttClient.connected()) {
-        String payload = voltage + "," + current + "," + soc;
-        mqttClient.publish(MQTT_TOPIC, payload.c_str());
+        String topic = String(MQTT_TOPIC) + "/" + key;
+        mqttClient.publish(topic.c_str(), value.c_str());
         lastDataSent = millis();
     }
 }
