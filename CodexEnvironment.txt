@@ -86,4 +86,4 @@ retry 5 5 arduino-cli lib install "SimpleRotary"
 retry 5 5 arduino-cli lib install "PubSubClient"
 
 echo "✅ Setup complete. Compile with:"
-echo "   arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 ESP8266-VicrtonHA.ino"
+echo "   arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 ESP8266-VictronHA.ino"
