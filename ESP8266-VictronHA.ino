@@ -5,13 +5,11 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
 
+#include "config.h"
+
 #define BAUD_RATE 19200
 #define i2c_Address 0x3C
 
-const char* WIFI_SSID = "YOURWIFI";
-const char* WIFI_PASS = "PASSWORD";
-const char* MQTT_BROKER = "192.168.50.3";
-const int   MQTT_PORT = 1883;
 const char* MQTT_TOPIC = "homeassistant/sensor/victron";
 
 WiFiClient espClient;
