@@ -1,5 +1,15 @@
 # ESP8266-VictronHA
-A Victron SmartShunt to Home Assistant interface (over wifi)
+A Victron SmartShunt to Home Assistant interface (over wifi).
+
+This sketch runs on an ESP8266, reads voltage, current, and state of charge
+values from a Victron SmartShunt over the serial interface, displays the
+information on an OLED screen, and publishes the measurements to an MQTT
+broker for consumption by Home Assistant.
+
+## Configuration
+
+Update the network credentials and MQTT broker settings in `config.h` to match
+your environment before compiling the sketch.
 
 ## Build
 
