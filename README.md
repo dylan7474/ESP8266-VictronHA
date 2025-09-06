@@ -42,3 +42,11 @@ state of the device:
 | 4       | Data recently published  |
 
 Each sequence repeats with a short pause between groups.
+
+## WiFi resilience
+
+The sketch monitors the wireless connection and enables automatic
+reconnection. If WiFi drops, the main loop triggers a disconnect and
+retries `connectWiFi()` for up to 10 seconds per attempt until the
+network is restored, allowing MQTT publishing to resume without manual
+intervention.
