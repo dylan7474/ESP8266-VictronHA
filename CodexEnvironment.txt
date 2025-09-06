@@ -18,16 +18,20 @@ echo "HTTPS_PROXY=${HTTPS_PROXY:-<unset>}"
 echo "NO_PROXY=${NO_PROXY}"
 
 echo "==> Using signed Ubuntu mirror"
+sources_file=""
 if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
-  sed -i \
-    -e 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
-    -e 's|http://security.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
-    /etc/apt/sources.list.d/ubuntu.sources
+  sources_file=/etc/apt/sources.list.d/ubuntu.sources
 elif [ -f /etc/apt/sources.list ]; then
+  sources_file=/etc/apt/sources.list
+fi
+
+if [ -n "$sources_file" ]; then
   sed -i \
     -e 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
     -e 's|http://security.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
-    /etc/apt/sources.list
+    "$sources_file"
+else
+  echo "No apt sources file found, skipping mirror configuration"
 fi
 
 # Drop unsigned or unreachable sources such as the LLVM repo

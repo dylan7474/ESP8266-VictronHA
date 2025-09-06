@@ -1,3 +1,4 @@
+.DEFAULT_GOAL := build
 FQBN=esp8266:esp8266:nodemcuv2
 SKETCH=ESP8266-VictronHA.ino
 BUILD_DIR=build

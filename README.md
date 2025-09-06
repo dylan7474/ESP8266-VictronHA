@@ -31,12 +31,12 @@ This project uses [arduino-cli](https://arduino.github.io/arduino-cli/latest/) t
 
    The script configures a local Arduino toolchain. It now detects
    both `/etc/apt/sources.list` and the newer `/etc/apt/sources.list.d/ubuntu.sources`
-   so it can run on a wider range of systems.
+   and will skip mirror configuration if neither file exists.
 
-3. Compile the sketch for NodeMCU v2:
+3. Compile the sketch for NodeMCU v2 (default make target):
 
    ```bash
-   make build
+   make       # or: make build
    ```
 
    The build artifacts will be placed in the `build/` directory.
