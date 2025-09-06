@@ -2,11 +2,6 @@
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-echo "==> Base packages"
-apt-get update
-apt-get install -y --no-install-recommends \
-  curl ca-certificates git python3 tar xz-utils
-
 # --- Proxy handling ---
 # Mirror the proxy you see in Codex logs (http://proxy:8080) for all tools.
 HTTP_PROXY="${HTTP_PROXY:-${http_proxy:-}}"
@@ -21,6 +16,20 @@ export no_proxy="${NO_PROXY:-}"
 echo "HTTP_PROXY=${HTTP_PROXY:-<unset>}"
 echo "HTTPS_PROXY=${HTTPS_PROXY:-<unset>}"
 echo "NO_PROXY=${NO_PROXY}"
+
+echo "==> Using signed Ubuntu mirror"
+sed -i \
+  -e 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
+  -e 's|http://security.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
+  /etc/apt/sources.list.d/ubuntu.sources
+
+# Drop unsigned or unreachable sources such as the LLVM repo
+rm -f /etc/apt/sources.list.d/archive_uri-http_apt_llvm_org_noble_-noble.list
+
+echo "==> Base packages"
+apt-get update
+apt-get install -y --no-install-recommends \
+  curl ca-certificates git python3 tar xz-utils
 
 # --- Prefer IPv4 to avoid IPv6 'network is unreachable' ---
 if ! grep -q '^precedence ::ffff:0:0/96 100' /etc/gai.conf 2>/dev/null; then
