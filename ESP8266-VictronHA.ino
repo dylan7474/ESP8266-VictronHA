@@ -29,8 +29,6 @@ float connectionTime = 0;
 bool wifiConnectedOnce = false;
 
 const int LED_PIN = LED_BUILTIN;
-unsigned long lastLED = 0;
-bool ledState = false;
 unsigned long lastDataSent = 0;
 
 void connectWiFi() {
@@ -68,25 +66,58 @@ void connectMQTT() {
     }
 }
 
-void updateLED() {
-    bool connected = (WiFi.status() == WL_CONNECTED) && mqttClient.connected();
-    unsigned long interval;
+void flashStatusCode(int code) {
+    static int currentCode = -1;
+    static int flashes = 0;
+    static bool ledOn = false;
+    static unsigned long lastChange = 0;
     unsigned long now = millis();
 
-    if (!connected) {
-        interval = 200; // Fast blink for connectivity issues
-    } else if (now - lastDataSent < 5000) {
-        interval = 1000; // Slow blink when data recently sent
-    } else {
-        digitalWrite(LED_PIN, HIGH); // Off when idle
+    if (code != currentCode) {
+        currentCode = code;
+        flashes = 0;
+        ledOn = false;
+        digitalWrite(LED_PIN, HIGH);
+        lastChange = now;
+    }
+
+    if (code <= 0) {
+        digitalWrite(LED_PIN, HIGH);
         return;
     }
 
-    if (now - lastLED >= interval) {
-        lastLED = now;
-        ledState = !ledState;
-        digitalWrite(LED_PIN, ledState ? LOW : HIGH); // LED is active LOW
+    if (flashes >= currentCode) {
+        if (now - lastChange >= 1000) {
+            flashes = 0;
+        }
+        return;
     }
+
+    if (now - lastChange >= 200) {
+        lastChange = now;
+        if (ledOn) {
+            digitalWrite(LED_PIN, HIGH);
+            ledOn = false;
+            flashes++;
+        } else {
+            digitalWrite(LED_PIN, LOW);
+            ledOn = true;
+        }
+    }
+}
+
+void updateLED() {
+    int code = 0;
+    if (WiFi.status() != WL_CONNECTED) {
+        code = 1; // WiFi disconnected
+    } else if (!mqttClient.connected()) {
+        code = 2; // MQTT disconnected
+    } else if (millis() - lastDataSent < 5000) {
+        code = 4; // Data recently sent
+    } else {
+        code = 3; // Connected and idle
+    }
+    flashStatusCode(code);
 }
 
 void updateDisplay() {
