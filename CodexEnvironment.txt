@@ -54,7 +54,7 @@ arduino-cli config init --overwrite
 
 # Boards index + proxy (this is the only network key we need)
 arduino-cli config set board_manager.additional_urls \
-  https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+  https://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 if [[ -n "${HTTPS_PROXY}" || -n "${HTTP_PROXY}" ]]; then
   arduino-cli config set network.proxy "${HTTPS_PROXY:-$HTTP_PROXY}"
@@ -66,14 +66,15 @@ arduino-cli config set network.socket_timeout 60s || true
 echo "==> Updating indexes (via proxy, with retries)"
 retry 5 5 arduino-cli core update-index
 
-echo "==> Installing ESP32 core"
-retry 5 5 arduino-cli core install esp32:esp32
+echo "==> Installing ESP8266 core"
+retry 5 5 arduino-cli core install esp8266:esp8266
 
 echo "==> Installing libraries"
 retry 5 5 arduino-cli lib install "Adafruit GFX Library"
 retry 5 5 arduino-cli lib install "ArduinoJson"
 retry 5 5 arduino-cli lib install "Adafruit SH110X"
 retry 5 5 arduino-cli lib install "SimpleRotary"
+retry 5 5 arduino-cli lib install "PubSubClient"
 
 echo "✅ Setup complete. Compile with:"
-echo "   arduino-cli compile --fqbn esp32:esp32:esp32 ESP-framework.ino"
+echo "   arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 ESP8266-VicrtonHA.ino"
