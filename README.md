@@ -15,16 +15,24 @@ your environment before compiling the sketch.
 
 This project uses [arduino-cli](https://arduino.github.io/arduino-cli/latest/) to compile for the ESP8266.
 
-1. Install dependencies and required libraries by running the setup script:
+1. Run the configuration script to verify required tools and libraries:
 
    ```bash
-   bash CodexEnvironment.txt
+   ./configure
    ```
 
-2. Compile the sketch for NodeMCU v2:
+   The script reports any missing dependencies and hints on how to install them.
+
+2. (Optional) Install the toolchain and libraries using the provided setup target:
 
    ```bash
-   arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 ESP8266-VictronHA.ino
+   make setup
+   ```
+
+3. Compile the sketch for NodeMCU v2:
+
+   ```bash
+   make build
    ```
 
 The sketch file `ESP8266-VictronHA.ino` must reside in a folder with the same name to compile correctly.
@@ -50,3 +58,7 @@ reconnection. If WiFi drops, the main loop triggers a disconnect and
 retries `connectWiFi()` for up to 10 seconds per attempt until the
 network is restored, allowing MQTT publishing to resume without manual
 intervention.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

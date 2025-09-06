@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -e
+missing=0
+
+check_tool() {
+  local tool="$1"
+  local hint="$2"
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "Missing required tool: $tool"
+    echo "  Hint: $hint"
+    missing=1
+  else
+    echo "Found $tool"
+  fi
+}
+
+check_lib() {
+  local lib="$1"
+  if ! arduino-cli lib list 2>/dev/null | grep -Fq "$lib"; then
+    echo "Missing Arduino library: $lib"
+    echo "  Hint: arduino-cli lib install \"$lib\""
+    missing=1
+  else
+    echo "Found Arduino library: $lib"
+  fi
+}
+
+check_tool arduino-cli "Install from https://arduino.github.io/arduino-cli/latest/"
+check_tool git "Install with: sudo apt-get install git"
+check_tool python3 "Install with: sudo apt-get install python3"
+
+if command -v arduino-cli >/dev/null 2>&1; then
+  if ! arduino-cli core list 2>/dev/null | grep -q '^esp8266:esp8266'; then
+    echo "Missing ESP8266 board core"
+    echo "  Hint: arduino-cli core install esp8266:esp8266"
+    missing=1
+  fi
+  check_lib "Adafruit GFX Library"
+  check_lib "ArduinoJson"
+  check_lib "Adafruit SH110X"
+  check_lib "SimpleRotary"
+  check_lib "PubSubClient"
+fi
+
+if [ $missing -ne 0 ]; then
+  echo "Configuration check failed. Please install missing dependencies."
+  exit 1
+else
+  echo "All dependencies satisfied."
+fi
