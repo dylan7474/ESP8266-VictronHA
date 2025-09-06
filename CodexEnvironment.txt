@@ -18,22 +18,37 @@ echo "HTTPS_PROXY=${HTTPS_PROXY:-<unset>}"
 echo "NO_PROXY=${NO_PROXY}"
 
 echo "==> Using signed Ubuntu mirror"
-sed -i \
-  -e 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
-  -e 's|http://security.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
-  /etc/apt/sources.list.d/ubuntu.sources
+if command -v apt-get >/dev/null 2>&1; then
+  sources_file=""
+  if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+    sources_file=/etc/apt/sources.list.d/ubuntu.sources
+  elif [ -f /etc/apt/sources.list ]; then
+    sources_file=/etc/apt/sources.list
+  fi
 
-# Drop unsigned or unreachable sources such as the LLVM repo
-rm -f /etc/apt/sources.list.d/archive_uri-http_apt_llvm_org_noble_-noble.list
+  if [ -f "$sources_file" ]; then
+    sed -i \
+      -e 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
+      -e 's|http://security.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
+      "$sources_file"
+  else
+    echo "No apt sources file found, skipping mirror configuration"
+  fi
 
-echo "==> Base packages"
-apt-get update
-apt-get install -y --no-install-recommends \
-  curl ca-certificates git python3 tar xz-utils
+  # Drop unsigned or unreachable sources such as the LLVM repo
+  rm -f /etc/apt/sources.list.d/archive_uri-http_apt_llvm_org_noble_-noble.list
 
-# --- Prefer IPv4 to avoid IPv6 'network is unreachable' ---
-if ! grep -q '^precedence ::ffff:0:0/96 100' /etc/gai.conf 2>/dev/null; then
-  echo 'precedence ::ffff:0:0/96 100' >> /etc/gai.conf
+  echo "==> Base packages"
+  apt-get update
+  apt-get install -y --no-install-recommends \
+    curl ca-certificates git python3 tar xz-utils
+
+  # --- Prefer IPv4 to avoid IPv6 'network is unreachable' ---
+  if ! grep -q '^precedence ::ffff:0:0/96 100' /etc/gai.conf 2>/dev/null; then
+    echo 'precedence ::ffff:0:0/96 100' >> /etc/gai.conf
+  fi
+else
+  echo "apt-get not found; skipping system package installation"
 fi
 
 # --- Helper: retry with backoff ---
