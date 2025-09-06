@@ -135,6 +135,21 @@ void processVictronData(String key, String value) {
     }
 }
 
+void startupBlink() {
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(LED_PIN, LOW);
+        delay(200);
+        digitalWrite(LED_PIN, HIGH);
+        delay(200);
+    }
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(LED_PIN, LOW);
+        delay(600);
+        digitalWrite(LED_PIN, HIGH);
+        delay(200);
+    }
+}
+
 void setup() {
     display.begin(i2c_Address, true);
     display.setTextSize(1);
@@ -150,6 +165,7 @@ void setup() {
 
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, HIGH);
+    startupBlink();
     WiFi.persistent(false);
     WiFi.setAutoReconnect(true);
 
