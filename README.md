@@ -28,3 +28,17 @@ This project uses [arduino-cli](https://arduino.github.io/arduino-cli/latest/) t
    ```
 
 The sketch file `ESP8266-VictronHA.ino` must reside in a folder with the same name to compile correctly.
+
+## LED status codes
+
+The built-in LED provides a repeating flash sequence to indicate the current
+state of the device:
+
+| Flashes | Meaning                  |
+| ------- | ------------------------ |
+| 1       | WiFi disconnected        |
+| 2       | MQTT disconnected        |
+| 3       | Connected and idle       |
+| 4       | Data recently published  |
+
+Each sequence repeats with a short pause between groups.
