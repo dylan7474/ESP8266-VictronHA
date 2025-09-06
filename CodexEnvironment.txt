@@ -18,10 +18,17 @@ echo "HTTPS_PROXY=${HTTPS_PROXY:-<unset>}"
 echo "NO_PROXY=${NO_PROXY}"
 
 echo "==> Using signed Ubuntu mirror"
-sed -i \
-  -e 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
-  -e 's|http://security.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
-  /etc/apt/sources.list.d/ubuntu.sources
+if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+  sed -i \
+    -e 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
+    -e 's|http://security.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
+    /etc/apt/sources.list.d/ubuntu.sources
+elif [ -f /etc/apt/sources.list ]; then
+  sed -i \
+    -e 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
+    -e 's|http://security.ubuntu.com/ubuntu/|https://mirrors.kernel.org/ubuntu/|g' \
+    /etc/apt/sources.list
+fi
 
 # Drop unsigned or unreachable sources such as the LLVM repo
 rm -f /etc/apt/sources.list.d/archive_uri-http_apt_llvm_org_noble_-noble.list

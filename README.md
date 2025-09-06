@@ -29,11 +29,17 @@ This project uses [arduino-cli](https://arduino.github.io/arduino-cli/latest/) t
    make setup
    ```
 
+   The script configures a local Arduino toolchain. It now detects
+   both `/etc/apt/sources.list` and the newer `/etc/apt/sources.list.d/ubuntu.sources`
+   so it can run on a wider range of systems.
+
 3. Compile the sketch for NodeMCU v2:
 
    ```bash
    make build
    ```
+
+   The build artifacts will be placed in the `build/` directory.
 
 The sketch file `ESP8266-VictronHA.ino` must reside in a folder with the same name to compile correctly.
 
